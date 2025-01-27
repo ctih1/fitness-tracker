@@ -1,0 +1,52 @@
+{
+    "theme": "Dark",
+    "exercises": {
+        "asayasyast": {
+            "name":"asayasyast",
+            "description": "astastast",
+            "steps": [
+                "kill yourself"
+            ]
+        },
+        "asyasdyzxfczxc": {
+            "name":"asyasdyzxfczxc",
+            "description": "asytasy",
+            "steps": [
+                "kill yourself"
+            ]
+        },
+        "Squat": {
+            "name":"Squat",
+            "description": "A squat movement, strenghtens legs & abdominal muscles",
+            "steps": [
+                "Find a comfortable place",
+                "Crouch",
+                "Profit"
+            ]
+        }
+    },
+    "workouts": {
+        "Daily": {
+            "exercises": ["asayasyast","Squat"],
+            "name": "Daily",
+            "description":"The workout I do at home daily"
+        }
+    },
+    "history": [
+        {
+            "exercise": {
+                "name":"Squat",
+                "description": "A squat movement, strenghtens legs & abdominal muscles",
+                "steps": [
+                    "Find a comfortable place",
+                    "Crouch",
+                    "Profit"
+                ]
+            },
+            "name": "Squat",
+            "reps": 12,
+            "weight": 0,
+            "date": 1737910877
+        }
+    ]
+}
