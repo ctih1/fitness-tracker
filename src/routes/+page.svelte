@@ -1,6 +1,12 @@
 <script lang="ts">
-    import { Button } from "$lib/components/ui/button";
+    import { onMount } from "svelte";
     import Reload from "svelte-radix/Reload.svelte";
+
+    import { Button } from "$lib/components/ui/button";
+    import { Input } from "$lib/components/ui/input"
+    import { Label } from "$lib/components/ui/label"
+    import { Textarea } from "$lib/components/ui/textarea"
+
     import {
         Dialog,
         DialogContent,
@@ -19,14 +25,24 @@
         CardHeader,
         CardTitle,
     } from "$lib/components/ui/card";
-    import { Input } from "$lib/components/ui/input"
-    import { Label } from "$lib/components/ui/label"
-    import { invoke } from '@tauri-apps/api/core';
-    import { onMount } from "svelte";
+
+    import {
+	    blur,
+        crossfade,
+        draw,
+        fade,
+        fly,
+        scale,
+        slide
+    } from 'svelte/transition';
+    import { expoInOut } from "svelte/easing";
+    import * as Tooltip from "$lib/components/ui/tooltip";
+
+
+    
 
     //@ts-ignore
     const invoker = window.__TAURI__.core.invoke;
-
     interface customWorkout {
         name: string,
         description: string,
@@ -41,7 +57,24 @@
         description: string
     }
 
+    interface Exercise {
+        description: String,
+        steps: String
+        name: String,
+        selected: boolean
+    }
+
+
     let workouts:customWorkout[] = []
+    
+    let name:String="";
+    let description:String="";
+    let steps:String="";
+
+    let workoutName:String="";
+    let workoutDescription:String="";
+
+    let exerciseSelected:String[] = [];
 
     onMount(()=>{
         getWorkouts().then(response=>{
@@ -63,25 +96,37 @@
         });
 
         return calculatedWorkouts;
-        
+    }
+
+    async function createExercise() {
+        let step_array = steps.split("\n");
+        await invoker("create_exercise", {name, description, steps:step_array});
+    }
+
+    async function createWorkout() {
+        let step_array = steps.split("\n");
+        let selectedWorkouts:String[] = [];
+        exercises.forEach((el:Exercise)=>{
+            if(el.selected) {
+                selectedWorkouts.push(el.name);
+            };
+        });
+        await invoker("create_workout", {name:workoutName, description:workoutDescription, exercises: selectedWorkouts});
     }
 
     async function getExercises() {
         let exercises = await invoker("get_every_exercise");
         console.log(exercises);   
+        exercises.forEach(el=>{
+            el["selected"] = false;
+        });
         return exercises;
     }
 
 
     let creatingExercise = false;
+    let creatingWorkout = false;
     let newWorkout = false;
-
-    async function greet() {
-        let resp = await invoker('save_exercise', { name:basicInfo, classes });
-        console.log(resp);
-        creatingExercise = false;
-    }
-
     
     //@ts-ignore
     function startWorkout(name:string, button) {
@@ -90,17 +135,16 @@
         button.variant="loading";
         window.location.href=`/workout?name=${name}`;
     }
-
-    getExercises();
-
-    let basicInfo:String;
-    let classes:String;
+    let exercises:databaseExercise[];
+    getExercises().then(e=>{
+        exercises = e;
+    });
 </script>
 
 <div>
     <h1 class="scroll-m-20 text-7xl font-extrabold">New workout</h1>
     <p class="font-bold">You can easily start new workouts here</p>
-    <div class="wrapper w-100 h-[80vh] flex justify-center items-center">
+    <div class="wrapper w-100 h-[60vh] flex justify-center items-center">
         <Dialog open={newWorkout}>
             <DialogTrigger>
                 <Button on:click={()=>newWorkout=true}>Start new workout!</Button>    
@@ -141,6 +185,7 @@
             </DialogContent>
         </Dialog>
     </div>
+    
     <Dialog open={creatingExercise}>
         <DialogTrigger>
             <Button variant="outline" on:click={()=>creatingExercise=true}>Create exercise</Button>    
@@ -153,17 +198,88 @@
             <div>
                 <div class="basic-info">
                     <Label>Name</Label>
-                    <Input bind:value={basicInfo}/>
+                    <Input placeholder="Squat" bind:value={name}/>
                 </div>
                 <div class="class-info">
-                    <Label>Type</Label>
-                    <Input bind:value={classes}/>
+                    <Label>Description</Label>
+                    <Input placeholder="A squat is a lower-body exercise where you bend your knees and hips to lower your body, then return to a standing position, targeting the legs and glutes." bind:value={description}/>
+                </div>
+                <div class="class-info">
+                    <Label>Steps</Label>
+                    <Textarea placeholder="Stand with feet shoulder-width apart.
+Bend your knees and lower your body like you're sitting.
+Keep your back straight and chest up.
+Push through your heels to stand back up." 
+                    bind:value={steps} class="resize-y min-h-[10em]" 
+                    />
                 </div>
             </div>
             <DialogFooter>
-                <Button on:click={greet} type="submit">Save</Button>
+                <Button on:click={()=>{creatingExercise=false;createExercise()}} type="submit">Save</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
+
+        <Dialog open={creatingWorkout}>
+            <DialogTrigger>
+                <Button variant="outline" on:click={()=>creatingWorkout=true}>Create workout</Button>    
+            </DialogTrigger>
+            <DialogContent class="h-[80vh] overflow-y-scroll">
+                <DialogHeader>
+                    <DialogTitle>Create workout</DialogTitle>
+                    <DialogDescription>Create new workout with exercises you've created</DialogDescription>
+                    
+                    <div class="selected flex">
+                        {#each exercises as exercise}
+                            {#if exercise.selected}
+                                <p>{exercise.name}</p>
+                                <Button class="" on:click={()=>exercise.selected=false}>X</Button>
+                            {/if}
+                        {/each}
+                    </div>
+                    
+                </DialogHeader>
+                <div>
+                    <Label>Workout name</Label>
+                    <Input bind:value={workoutName} />
+                    <Label>Workout description</Label>
+                    <Input bind:value={workoutDescription} />
+                </div>
+                <div>
+                    <h1>Select exercises to include</h1>
+                    {#each exercises as exercise}
+                        {#if !exercise.selected}
+                        <div in:blur out:slide={{ duration: 500 }} class="wrap">
+                            <Card>
+                                <CardHeader>
+                                    <h1 class="font-extrabold text-3xl">{exercise.name}</h1>
+                                    <p>{exercise.description}
+                                </CardHeader>
+                                <CardContent>
+                                    <Label class="font-semibold text-xl">Steps: </Label>
+                                    <ol>
+                                    {#each exercise.steps as step, index}
+                                        <li>{index+1}. {step}</li>
+                                    {/each}
+                                    </ol>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button on:click={()=>{exercise.selected=true}} variant="secondary">Add</Button>
+                                </CardFooter>   
+                            </Card>
+                        </div>
+                        {/if}
+                    {/each}
+                </div>
+                <DialogFooter>
+                    <Button on:click={()=>{creatingWorkout=false; createWorkout()}} type="submit">Save</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
 </div>
 
+<style>
+    .selected p:not(:last-child)::after{
+        content: ",";
+    }
+</style>

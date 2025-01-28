@@ -32,7 +32,9 @@
         name: String,
         description: String,
         steps: String[],
-        done?:boolean
+        done?:boolean,
+        reps?:number,
+        weight?:number
     }
 
     interface databaseWorkout {
@@ -61,10 +63,10 @@
         return resp as databaseWorkout
     }
 
+
     let unfinishedEx:boolean = $state(false);
     let alertDismissed:boolean = $state(false);
 
-    let exerciseData:Exercise;
     let workoutData:Workout;
     let loaded:boolean = $state(false);
 
@@ -91,6 +93,16 @@
                 throw Error("Waiting for user confirmation");
             }
         });
+
+        console.log(workoutData.exercises);
+
+        invoker("save_workout", {
+            name:workoutName,
+            exercises: workoutData.exercises,
+            date: Math.round(Date.now() / 1000)
+            }
+        );
+        
         alertDismissed = false;
         console.log("Saved workout");
 
@@ -133,7 +145,11 @@
                 <CardFooter>
                     <div class="flex-row">
                         <h3 class="text-xl mb-[10px]">Reps:</h3>
-                        <NumberInput inputClass="w-[10ch]"/>
+                        <NumberInput bind:value={exercise.reps} inputClass="w-[10ch]"/>
+                    </div>
+                    <div class="flex-row">
+                        <h3 class="text-xl mb-[10px]">Weight:</h3>
+                        <NumberInput bind:value={exercise.weight} inputClass="w-[10ch]"/>
                     </div>
                 </CardFooter>
             </Card>
@@ -141,7 +157,10 @@
         {/each}
     {/if}
 
-    <Button class="mb-0 mt-[auto] h-[10vh]" on:click={()=>saveWorkout()}>Finish workout!</Button>
+    <Button
+        class="mb-[20vh] mt-[5vh] h-[10vh] w-[80vw] ml-[auto] mr-[auto]"
+        on:click={()=>saveWorkout()}
+    >Finish workout!</Button>
 
 
     <AlertDialog open={unfinishedEx}>

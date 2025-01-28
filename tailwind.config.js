@@ -3,8 +3,9 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 /** @type {import('tailwindcss').Config} */
 const config = {
 	darkMode: ["class"],
-	content: ["./src/**/*.{html,js,svelte,ts}"],
+	content: ["./src/**/*.{html,js,svelte,ts}","./node_modules/layerchart/**/*.{svelte,js}"],
 	safelist: ["dark"],
+
 	theme: {
 		container: {
 			center: true,
@@ -58,7 +59,8 @@ const config = {
 				sans: [...fontFamily.sans]
 			}
 		}
-	},
+	}
+
 };
 
 export default config;

@@ -4,7 +4,7 @@
 	import { TabsList,Tabs, TabsTrigger } from "$lib/components/ui/tabs";
     import { resetMode, setMode } from "mode-watcher";
 	let { children } = $props();
-
+	document.addEventListener('contextmenu', event => event.preventDefault());
 	console.log(window.location.pathname);
 </script>
 <ModeWatcher />
@@ -13,7 +13,7 @@
 <div class="tabs fixed bottom-0 ml-a mr-a w-screen">
 	<Tabs on:change={(val)=>console.log(val)}  value={window.location.pathname}>
 		<TabsList class="w-screen h-[10vh]">
-			<TabsTrigger class="h-[9vh] w-[25vw] text-xl" value="history">History</TabsTrigger>
+			<TabsTrigger class="h-[9vh] w-[25vw] text-xl" on:click={()=>window.location.href="/history"} value="/history">History</TabsTrigger>
 			<TabsTrigger class="h-[9vh] w-[25vw] text-xl" on:click={()=>window.location.href="/"} value="/">New</TabsTrigger>
 			<TabsTrigger class="h-[9vh] w-[25vw] text-xl" on:click={()=>window.location.href="/settings"} value="/settings">Settings</TabsTrigger>
 		</TabsList>
