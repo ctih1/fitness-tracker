@@ -2,95 +2,99 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{array::from_ref, collections::HashMap};
+use tauri_plugin_fs::FsExt;
 
 use database::db;
 
 mod database;
 
-
-#[cfg_attr(mobile,tauri::mobile_entry_point)]
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
 fn main() {
-  tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![
-      get_exercise, create_exercise,get_every_exercise,
-      get_every_workout, get_workout,get_workout_exercises,
-      save_workout, create_workout
-      ])
-    .setup(|app| {
-        println!("{}", app.package_info().version.to_string());
-        Ok(())
-    })
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .setup(|app| {
+            println!("{}", app.package_info().version.to_string());
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            get_exercise,
+            create_exercise,
+            get_every_exercise,
+            get_workout,
+            get_every_workout,
+            get_workout_exercises,
+            save_workout,
+            create_workout
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running Tauri application");
 }
 
 #[tauri::command]
-fn get_exercise(name:&str) -> database::Exercise {
-  let db = database::db::new();
-  return db.get_exercise(name)
+fn get_exercise(app_handle: tauri::AppHandle,name: &str) -> database::Exercise {
+    let db = database::db::new(app_handle);
+    return db.get_exercise(name);
 }
 
 #[tauri::command]
-fn get_workout(name:&str) -> database::Workout {
-  let db = database::db::new();
-  return db.get_workout(name)
+fn get_workout(app_handle: tauri::AppHandle,name: &str) -> database::Workout {
+    let db = database::db::new(app_handle);
+    return db.get_workout(name);
 }
 
 #[tauri::command]
-fn get_every_workout() -> Vec<database::Workout> {
-  let db = database::db::new();
-  return db.get_every_workout();
-}
-
-
-#[tauri::command]
-fn get_every_exercise() -> Vec<database::Exercise> {
-  let db = database::db::new();
-  return db.get_every_exercise();
+fn get_every_workout(app_handle: tauri::AppHandle) -> Vec<database::Workout> {
+    let db = database::db::new(app_handle);
+    return db.get_every_workout();
 }
 
 #[tauri::command]
-fn get_workout_exercises(name: &str) -> Vec<database::Exercise> {
-  let db = database::db::new();
-  return db.get_workout_exercises(name);
+fn get_every_exercise(app_handle: tauri::AppHandle) -> Vec<database::Exercise> {
+    let db = database::db::new(app_handle);
+    return db.get_every_exercise();
 }
 
 #[tauri::command]
-fn create_exercise(name: &str, description:String, steps:Vec<String>) {
-  let mut db = database::db::new();
-
-  let e_name: String = name.to_string();
-
-  let exercise: database::Exercise = database::Exercise {
-    description,
-    steps,
-    name:e_name
-  };
-  db.create_exercise(name.to_string(),exercise);
+fn get_workout_exercises(app_handle: tauri::AppHandle,name: &str) -> Vec<database::Exercise> {
+    let db = database::db::new(app_handle);
+    return db.get_workout_exercises(name);
 }
 
 #[tauri::command]
-fn create_workout(name: &str, description:String, exercises:Vec<String>) {
-  let mut db = database::db::new();
+fn create_exercise(app_handle: tauri::AppHandle,name: &str, description: String, steps: Vec<String>) {
+    let mut db = database::db::new(app_handle);
 
-  let e_name: String = name.to_string();
+    let e_name: String = name.to_string();
 
-  let workout: database::Workout= database::Workout {
-    name:e_name,
-    description,
-    exercises
-  };
-  db.create_workout(name.to_string(),workout);
+    let exercise: database::Exercise = database::Exercise {
+        description,
+        steps,
+        name: e_name,
+    };
+    db.create_exercise(name.to_string(), exercise);
 }
 
+#[tauri::command]
+fn create_workout(app_handle: tauri::AppHandle,name: &str, description: String, exercises: Vec<String>) {
+    let mut db = database::db::new(app_handle);
+
+    let e_name: String = name.to_string();
+
+    let workout: database::Workout = database::Workout {
+        name: e_name,
+        description,
+        exercises,
+    };
+    db.create_workout(name.to_string(), workout);
+}
 
 #[tauri::command]
-fn save_workout(name: String, exercises:Vec<database::ExerciseResults>,date: i32) {
-  let mut db = database::db::new();
+fn save_workout(app_handle: tauri::AppHandle, name: String, exercises: Vec<database::ExerciseResults>, date: i32) {
+    let mut db = database::db::new(app_handle);
 
-  db.save_workout(database::WorkoutHistory {
-    name,
-    exercises,
-    date
-  });
+    db.save_workout(database::WorkoutHistory {
+        name,
+        exercises,
+        date,
+    });
 }
