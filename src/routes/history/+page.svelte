@@ -1,7 +1,18 @@
 <script lang="ts">
+    import { Area, Axis, Chart, Highlight, Svg, Tooltip } from "layerchart";
+    import { scaleTime } from "d3-scale";
+    import { today, getLocalTimeZone } from "@internationalized/date";
+
     import { Button } from "$lib/components/ui/button";
     import { Calendar } from "$lib/components/ui/calendar";
-    import { Area, Axis, Chart, Highlight, Svg, Tooltip } from "layerchart";
+
+    import * as Carousel from "$lib/components/ui/carousel";
+
+    import {
+        Card,
+        CardContent
+    } from "$lib/components/ui/card";
+
     import {
         Dialog,
         DialogContent,
@@ -12,14 +23,7 @@
         DialogTrigger,
     } from "$lib/components/ui/dialog";
 
-    import * as Carousel from "$lib/components/ui/carousel";
-
-    import { scaleTime } from "d3-scale";
-    import { today, getLocalTimeZone } from "@internationalized/date";
-    import Card from "$lib/components/ui/card/card.svelte";
-    import CardContent from "$lib/components/ui/card/card-content.svelte";
-    import { onMount } from "svelte";
-
+    
     //@ts-ignore
     const invoker = window.__TAURI__.core.invoke;
 
@@ -68,11 +72,9 @@
         return finalData;   
     }
 
+    //@ts-ignore
     invoker("get_history").then(r=>{
         workoutHistory = new Map(Object.entries(r)); 
-        console.log(workoutHistory.keys().toArray());
-        console.log("data");
-        console.log(workoutHistory.get("30-01-2025"));
         historyLoaded = true;
     });
 

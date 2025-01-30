@@ -1,11 +1,17 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import Reload from "svelte-radix/Reload.svelte";
+    import { onMount } from "svelte"
+    import Reload from "svelte-radix/Reload.svelte"
 
-    import { Button } from "$lib/components/ui/button";
+    import { Button } from "$lib/components/ui/button"
     import { Input } from "$lib/components/ui/input"
     import { Label } from "$lib/components/ui/label"
     import { Textarea } from "$lib/components/ui/textarea"
+
+    import {
+	    blur,
+        slide
+    } from 'svelte/transition'
+    
 
     import {
         Dialog,
@@ -14,7 +20,6 @@
         DialogFooter,
         DialogHeader,
         DialogTitle,
-        DialogTrigger,
     } from "$lib/components/ui/dialog"
 
     import {
@@ -24,22 +29,9 @@
         CardFooter,
         CardHeader,
         CardTitle,
-    } from "$lib/components/ui/card";
-
-    import {
-	    blur,
-        crossfade,
-        draw,
-        fade,
-        fly,
-        scale,
-        slide
-    } from 'svelte/transition';
-    import { expoInOut } from "svelte/easing";
-    import * as Tooltip from "$lib/components/ui/tooltip";
+    } from "$lib/components/ui/card"
 
 
-    
 
     //@ts-ignore
     const invoker = window.__TAURI__.core.invoke;
@@ -65,26 +57,15 @@
     }
 
 
-    let workouts:customWorkout[] = []
-    
+    let workouts:customWorkout[] = [];
+    let exercises:Exercise[];
+
     let name:String="";
     let description:String="";
     let steps:String="";
 
     let workoutName:String="";
     let workoutDescription:String="";
-
-    let exerciseSelected:String[] = [];
-
-    onMount(()=>{
-        getWorkouts().then(response=>{
-            workouts = response;
-        });
-
-        getExercises().then(e=>{
-            exercises = e;
-        });
-    })
 
     async function getWorkouts(): Promise<customWorkout[]> {
         let workouts:databaseWorkout[] = await invoker("get_every_workout");
@@ -104,18 +85,17 @@
 
     async function createExercise() {
         let step_array = steps.split("\n");
-        await invoker("create_exercise", {name, description, steps:step_array}).then(resp=>{
+        await invoker("create_exercise", {name, description, steps:step_array})
+        .then(()=>{
             window.location.reload();
-
         })
     }
 
     async function createWorkout() {
-        let step_array = steps.split("\n");
         let selectedWorkouts:String[] = [];
-        exercises.forEach((el:Exercise)=>{
-            if(el.selected) {
-                selectedWorkouts.push(el.name);
+        exercises.forEach((e:Exercise)=>{
+            if(e.selected) {
+                selectedWorkouts.push(e.name);
             };
         });
         await invoker("create_workout", {name:workoutName, description:workoutDescription, exercises: selectedWorkouts});
@@ -124,8 +104,9 @@
     async function getExercises() {
         let exercises = await invoker("get_every_exercise");
         console.log(exercises);   
-        exercises.forEach(el=>{
-            el["selected"] = false;
+        //@ts-ignore
+        exercises.forEach(e=>{
+            e["selected"] = false;
         });
         return exercises;
     }
@@ -142,7 +123,17 @@
         button.variant="loading";
         window.location.href=`/workout?name=${name}`;
     }
-    let exercises:databaseExercise[];
+
+    
+    onMount(()=>{
+        getWorkouts().then(response=>{
+            workouts = response;
+        });
+
+        getExercises().then(e=>{
+            exercises = e;
+        });
+    })
 </script>
 
 <div>

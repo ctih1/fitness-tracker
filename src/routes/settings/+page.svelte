@@ -1,7 +1,6 @@
 <script>
     import { Button } from "$lib/components/ui/button";
-    import { TabsList,Tabs, TabsTrigger } from "$lib/components/ui/tabs";
-    import { resetMode, setMode } from "mode-watcher";
+    import { setMode } from "mode-watcher";
 </script>
 
 

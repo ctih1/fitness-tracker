@@ -2,12 +2,9 @@
 	import '../app.css';
 	import { ModeWatcher } from "mode-watcher";
 	import { TabsList,Tabs, TabsTrigger } from "$lib/components/ui/tabs";
-    import { resetMode, setMode } from "mode-watcher";
 
 	let { children } = $props();
 	document.addEventListener('contextmenu', event => event.preventDefault());
-	console.log(window.location.pathname);
-	
 </script>
 <ModeWatcher />
 

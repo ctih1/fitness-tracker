@@ -26,6 +26,7 @@
     } from "$lib/components/ui/card"
 
     const urlParams = new URLSearchParams(window.location.search);
+    
     let workoutName:string = urlParams.get("name")??"Error";
 
     interface Exercise {
