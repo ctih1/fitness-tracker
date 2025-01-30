@@ -3,14 +3,9 @@ use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use tauri_plugin_store::StoreExt;
 use std::path::Path;
+use serde_json::json;
+use std::collections::HashMap;
 
-use serde_json::{from_value, json};
-
-use std::{
-    collections::HashMap,
-    fs::{create_dir, read_to_string, File},
-    io::{BufWriter, Write},
-};
 
 #[derive(Deserialize, Serialize, Clone)]
 enum Theme {

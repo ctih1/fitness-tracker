@@ -2,10 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{array::from_ref, collections::HashMap};
-use tauri_plugin_fs::FsExt;
-
 use database::db;
-
 mod database;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
