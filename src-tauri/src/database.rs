@@ -1,11 +1,10 @@
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
-use tauri_plugin_store::StoreExt;
-use std::{fs::create_dir_all, path::Path};
 use serde_json::json;
 use std::collections::HashMap;
-
+use std::{fs::create_dir_all, path::Path};
+use tauri::Manager;
+use tauri_plugin_store::StoreExt;
 
 #[derive(Deserialize, Serialize, Clone)]
 enum Theme {
@@ -49,11 +48,11 @@ struct Data {
 
 pub struct db {
     data: Data,
-    app: tauri::AppHandle
+    app: tauri::AppHandle,
 }
 
 impl db {
-    pub fn new(app_handle:tauri::AppHandle) -> Self {
+    pub fn new(app_handle: tauri::AppHandle) -> Self {
         println!(
             "{}",
             std::env::current_dir()
@@ -61,12 +60,13 @@ impl db {
                 .into_os_string()
                 .into_string()
                 .unwrap()
-        );        
+        );
 
-        let app_path: std::path::PathBuf = app_handle.path().app_config_dir().expect("No app config!");
-    println!("{}",app_path.to_str().unwrap());
+        let app_path: std::path::PathBuf =
+            app_handle.path().app_config_dir().expect("No app config!");
+        println!("{}", app_path.to_str().unwrap());
         create_dir_all(&app_path).unwrap();
-        
+
         let result = app_handle.store(Path::new(app_path.as_path()).join("store.json"));
         if result.is_err() {
             panic!("Failed to load store!");
@@ -80,12 +80,15 @@ impl db {
                 workouts: HashMap::new(),
                 history: HashMap::new(),
             };
-            store.set("data",json!(example_data));
-            store.set("init",true);
+            store.set("data", json!(example_data));
+            store.set("init", true);
             store.save();
         }
-        let data:Data = serde_json::from_value(store.get("data").unwrap()).unwrap();
-        return Self { app:app_handle, data };
+        let data: Data = serde_json::from_value(store.get("data").unwrap()).unwrap();
+        return Self {
+            app: app_handle,
+            data,
+        };
     }
 
     pub fn create_exercise(&mut self, name: String, exercise: Exercise) {
@@ -103,8 +106,11 @@ impl db {
 
         let app_path = self.app.path().app_config_dir().expect("No app config!");
 
-        let store = self.app.store(Path::new(app_path.as_path()).join("store.json")).unwrap();
-        store.set("data",json!(self.data));
+        let store = self
+            .app
+            .store(Path::new(app_path.as_path()).join("store.json"))
+            .unwrap();
+        store.set("data", json!(self.data));
         store.save();
     }
 
@@ -173,7 +179,7 @@ impl db {
     }
 
     pub fn get_history(&self) -> HashMap<String, Vec<WorkoutHistory>> {
-        println!("Length: {}",self.data.history.len());
+        println!("Length: {}", self.data.history.len());
         return self.data.history.clone();
     }
 }

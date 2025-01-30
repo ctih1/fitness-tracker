@@ -47,6 +47,7 @@
 	"dependencies": {
 		"@tauri-apps/api": "^2.2.0",
 		"@tauri-apps/plugin-fs": "^2.2.0",
+		"@tauri-apps/plugin-notification": "^2.2.1",
 		"@tauri-apps/plugin-store": "^2.2.0",
 		"class-variance-authority": "^0.7.1",
 		"d3-array": "^3.2.4",
