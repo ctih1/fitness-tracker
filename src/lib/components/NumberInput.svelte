@@ -8,6 +8,8 @@
     export let value:number = l_value;
     export let inputClass:string;
 
+    $: value = l_value;
+
 </script>
 
 <div class="wrapper flex">

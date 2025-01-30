@@ -77,7 +77,6 @@
     let exerciseSelected:String[] = [];
 
     onMount(()=>{
-        alert("Mounted!");
         getWorkouts().then(response=>{
             workouts = response;
         });
@@ -106,7 +105,6 @@
     async function createExercise() {
         let step_array = steps.split("\n");
         await invoker("create_exercise", {name, description, steps:step_array}).then(resp=>{
-            alert(resp);
             window.location.reload();
 
         })
@@ -151,10 +149,16 @@
     <h1 class="scroll-m-20 text-7xl font-extrabold">New workout</h1>
     <p class="font-bold">You can easily start new workouts here</p>
     <div class="wrapper w-100 h-[60vh] flex justify-center items-center">
+        <div class="buttons">
+            <Button class="w-[50vw] h-[10vh]" on:click={()=>newWorkout=true}>Start new workout!</Button>    
+            <div class="secondary flex mt-[0.5em]">
+                <Button class="w-[50%] m-[0.5em] ml-[0px]" variant="secondary" on:click={()=>creatingExercise=true}>Create exercise</Button>   
+                <Button class="w-[50%] m-[0.5em] mr-[0px]" variant="outline" on:click={()=>creatingWorkout=true}>Create workout</Button>    
+
+            </div>
+
+        </div>
         <Dialog open={newWorkout}>
-            <DialogTrigger>
-                <Button on:click={()=>newWorkout=true}>Start new workout!</Button>    
-            </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Start a new workout</DialogTitle>
@@ -193,9 +197,6 @@
     </div>
     
     <Dialog open={creatingExercise}>
-        <DialogTrigger>
-            <Button variant="outline" on:click={()=>creatingExercise=true}>Create exercise</Button>    
-        </DialogTrigger>
         <DialogContent>
             <DialogHeader>
                 <DialogTitle>Create exercise</DialogTitle>
@@ -227,9 +228,6 @@ Push through your heels to stand back up."
     </Dialog>
 
         <Dialog open={creatingWorkout}>
-            <DialogTrigger>
-                <Button variant="outline" on:click={()=>creatingWorkout=true}>Create workout</Button>    
-            </DialogTrigger>
             <DialogContent class="h-[80vh] overflow-y-scroll">
                 <DialogHeader>
                     <DialogTitle>Create workout</DialogTitle>

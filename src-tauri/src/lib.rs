@@ -19,7 +19,8 @@ pub fn run() {
             get_every_workout,
             get_workout_exercises,
             save_workout,
-            create_workout
+            create_workout,
+            get_history
         ])
         .run(tauri::generate_context!())
         .expect("error while running Tauri application");
@@ -92,4 +93,12 @@ fn save_workout(app_handle: tauri::AppHandle, name: String, exercises: Vec<datab
         exercises,
         date,
     });
+}
+
+
+#[tauri::command]
+fn get_history(app_handle: tauri::AppHandle) -> HashMap<String, Vec<database::WorkoutHistory>> {
+    let db = database::db::new(app_handle);
+    println!("Getting history");
+    return db.get_history();
 }

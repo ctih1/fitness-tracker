@@ -63,16 +63,14 @@ impl db {
                 .unwrap()
         );        
 
-        let app_path = app_handle.path().app_config_dir().expect("No app config!");
+        let app_path: std::path::PathBuf = app_handle.path().app_config_dir().expect("No app config!");
+    println!("{}",app_path.to_str().unwrap());
         create_dir_all(&app_path).unwrap();
         
         let result = app_handle.store(Path::new(app_path.as_path()).join("store.json"));
         if result.is_err() {
             panic!("Failed to load store!");
         }
-
-        
-
 
         let store = result.unwrap();
         if !store.get("init").is_some() {
@@ -172,5 +170,10 @@ impl db {
         }
         self.data.history = history;
         self.save_self();
+    }
+
+    pub fn get_history(&self) -> HashMap<String, Vec<WorkoutHistory>> {
+        println!("Length: {}",self.data.history.len());
+        return self.data.history.clone();
     }
 }

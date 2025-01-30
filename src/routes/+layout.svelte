@@ -3,9 +3,11 @@
 	import { ModeWatcher } from "mode-watcher";
 	import { TabsList,Tabs, TabsTrigger } from "$lib/components/ui/tabs";
     import { resetMode, setMode } from "mode-watcher";
+
 	let { children } = $props();
 	document.addEventListener('contextmenu', event => event.preventDefault());
 	console.log(window.location.pathname);
+	
 </script>
 <ModeWatcher />
 
@@ -20,10 +22,14 @@
 	</Tabs>
 </div>
 
+
 <style>
 
 	@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-
+	:root {
+		touch-action: pan-x pan-y;
+		height: 100%
+	}
 	:global(*) {
 		font-family: "Inter", serif !important;
 	}
