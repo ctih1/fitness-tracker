@@ -77,9 +77,14 @@
     let exerciseSelected:String[] = [];
 
     onMount(()=>{
+        alert("Mounted!");
         getWorkouts().then(response=>{
             workouts = response;
-        })
+        });
+
+        getExercises().then(e=>{
+            exercises = e;
+        });
     })
 
     async function getWorkouts(): Promise<customWorkout[]> {
@@ -100,7 +105,11 @@
 
     async function createExercise() {
         let step_array = steps.split("\n");
-        await invoker("create_exercise", {name, description, steps:step_array});
+        await invoker("create_exercise", {name, description, steps:step_array}).then(resp=>{
+            alert(resp);
+            window.location.reload();
+
+        })
     }
 
     async function createWorkout() {
@@ -136,9 +145,6 @@
         window.location.href=`/workout?name=${name}`;
     }
     let exercises:databaseExercise[];
-    getExercises().then(e=>{
-        exercises = e;
-    });
 </script>
 
 <div>

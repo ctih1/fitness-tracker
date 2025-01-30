@@ -2,7 +2,7 @@ use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
 use tauri_plugin_store::StoreExt;
-use std::path::Path;
+use std::{fs::create_dir_all, path::Path};
 use serde_json::json;
 use std::collections::HashMap;
 
@@ -61,14 +61,12 @@ impl db {
                 .into_os_string()
                 .into_string()
                 .unwrap()
-        );
+        );        
 
+        let app_path = app_handle.path().app_config_dir().expect("No app config!");
+        create_dir_all(&app_path).unwrap();
         
-        
-
-        let store_path = app_handle.path().app_data_dir().unwrap();
-        
-        let result = app_handle.store(Path::new(store_path.as_path()).join("store.json"));
+        let result = app_handle.store(Path::new(app_path.as_path()).join("store.json"));
         if result.is_err() {
             panic!("Failed to load store!");
         }
@@ -105,9 +103,9 @@ impl db {
     pub fn save_self(&mut self) {
         println!("Creating thing");
 
-        let store_path = self.app.path().app_data_dir().unwrap();
+        let app_path = self.app.path().app_config_dir().expect("No app config!");
 
-        let store = self.app.store(Path::new(store_path.as_path()).join("store.json")).unwrap();
+        let store = self.app.store(Path::new(app_path.as_path()).join("store.json")).unwrap();
         store.set("data",json!(self.data));
         store.save();
     }
