@@ -22,6 +22,7 @@
         DialogTitle,
         DialogTrigger,
     } from "$lib/components/ui/dialog";
+    import { blur, fly } from "svelte/transition";
 
     
     //@ts-ignore
@@ -152,6 +153,7 @@
 </Dialog>
 
 {#if historyLoaded}
+<div in:fly class="wrapper">
     <Carousel.Root opts={{direction:"rtl"}}>
         <Carousel.Content dir="rtl">
             {@const dates = Array.from(workoutHistory.keys())}
@@ -190,5 +192,6 @@
         <Carousel.Previous/>
         <Carousel.Next/>
     </Carousel.Root>
+</div>
 {/if}
 
