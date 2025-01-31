@@ -35,7 +35,7 @@
 
     interface ChartData {
         date: Date,
-        value: string
+        value: number;
     }
 
     let workoutHistory:Map<String,WorkoutHistory[]>;
@@ -72,17 +72,84 @@
         return finalData;   
     }
 
+    function processWorkoutHistory(wh:any) {
+        let data:ChartData[] = [];
+        wh.forEach((key:WorkoutHistory[],value:string) => {
+        console.log(key);
+
+            let repsForDay:number = 0;
+            key.forEach((workout:WorkoutHistory) => {
+                workout.exercises.forEach((item)=>{
+                    repsForDay += item.reps;
+                });
+            });
+            let [day, month, year] = value.split("-");
+            let date = new Date(`${year}-${month}-${day}`);
+            data.push({date,value:repsForDay});
+
+        });
+        return data;
+    };
+
     //@ts-ignore
     invoker("get_history").then(r=>{
         workoutHistory = new Map(Object.entries(r)); 
         historyLoaded = true;
+        data = processWorkoutHistory(workoutHistory);
     });
 
     let date = today(getLocalTimeZone());
-    $: data = processData(date.toDate(getLocalTimeZone()).getTime() / 1000);  
 </script>
 
 <h1 class="text-5xl font-extrabold">History</h1>
+<Dialog>
+    <DialogTrigger>
+        <Button variant="outline">View stats</Button>
+    </DialogTrigger>
+    <DialogContent class="w-[90vw]">
+        <DialogHeader>
+            <DialogTitle>History of Exercise</DialogTitle>
+            <DialogDescription
+                >Create a new excercise. Press save to save</DialogDescription
+            >
+        </DialogHeader>
+        <Calendar bind:value={date} />
+        <div class="h-[40vh] p-4 border rounded">
+            <Chart
+                {data}
+                x="date"
+                xScale={scaleTime()}
+                y="value"
+                yDomain={[0, null]}
+                yNice
+                padding={{ left: 16, bottom: 24 }}
+                tooltip={{ mode: "bisect-x" }}
+            >
+                <Svg>
+                    <Axis placement="left" grid rule />
+                    <Axis placement="bottom" rule />
+                    <Area
+                        line={{ class: "stroke-[2px] stroke-violet-950" }}
+                        class="fill-violet-400"
+                    />
+                    <Highlight points lines />
+                </Svg>
+                <Tooltip.Root let:data>
+                    <Tooltip.Header
+                        >{data.date.toUTCString()}</Tooltip.Header
+                    >
+                    <Tooltip.List>
+                        <Tooltip.Item label="Reps" value={data.value} />
+                    </Tooltip.List>
+                </Tooltip.Root>
+            </Chart>
+        </div>
+
+        <DialogFooter>
+            <Button type="submit">Close</Button>
+        </DialogFooter>
+    </DialogContent>
+</Dialog>
 
 {#if historyLoaded}
     <Carousel.Root opts={{direction:"rtl"}}>
@@ -125,51 +192,3 @@
     </Carousel.Root>
 {/if}
 
-<Dialog>
-    <DialogTrigger>
-        <Button variant="outline">View stats</Button>
-    </DialogTrigger>
-    <DialogContent class="w-[90vw]">
-        <DialogHeader>
-            <DialogTitle>History of Exercise</DialogTitle>
-            <DialogDescription
-                >Create a new excercise. Press save to save</DialogDescription
-            >
-        </DialogHeader>
-        <Calendar bind:value={date} />
-        <div class="h-[300px] p-4 border rounded">
-            <Chart
-                {data}
-                x="date"
-                xScale={scaleTime()}
-                y="value"
-                yDomain={[0, null]}
-                yNice
-                padding={{ left: 16, bottom: 24 }}
-                tooltip={{ mode: "bisect-x" }}
-            >
-                <Svg>
-                    <Axis placement="left" grid rule />
-                    <Axis placement="bottom" rule />
-                    <Area
-                        line={{ class: "stroke-[2px] stroke-violet-950" }}
-                        class="fill-violet-400"
-                    />
-                    <Highlight points lines />
-                </Svg>
-                <Tooltip.Root let:data>
-                    <Tooltip.Header
-                        >{new Date(data.date).toUTCString()}</Tooltip.Header
-                    >
-                    <Tooltip.List>
-                        <Tooltip.Item label="value" value={data.value} />
-                    </Tooltip.List>
-                </Tooltip.Root>
-            </Chart>
-        </div>
-
-        <DialogFooter>
-            <Button type="submit">Close</Button>
-        </DialogFooter>
-    </DialogContent>
-</Dialog>
