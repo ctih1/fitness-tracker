@@ -269,6 +269,7 @@
 					"\".\"",
 				);
 				INFOPLIST_FILE = app_iOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fitness tracker";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -378,6 +379,7 @@
 					"\".\"",
 				);
 				INFOPLIST_FILE = app_iOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fitness tracker";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

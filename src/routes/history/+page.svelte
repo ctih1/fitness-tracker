@@ -87,7 +87,7 @@
 {#if historyLoaded}
     <Carousel.Root opts={{direction:"rtl"}}>
         <Carousel.Content dir="rtl">
-            {@const dates = workoutHistory.keys().toArray()}
+            {@const dates = Array.from(workoutHistory.keys())}
             {#each dates as date}
                 {@const workoutData = workoutHistory.get(date) || []}
                 <Carousel.Item>
