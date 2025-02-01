@@ -39,45 +39,27 @@
         value: number;
     }
 
-    let workoutHistory:Map<String,WorkoutHistory[]>;
+    //@ts-ignore
+    let workoutHistory:Map<String,WorkoutHistory[]> = $state();
+    let workoutChartData:ChartData[];
+    //@ts-ignore
+    let timeChartData:ChartData[] = $state({date:new Date(), value:15});
 
-    let rawData:any[] = [];
-    let dayAmount: number = 70;
-    let historyLoaded:boolean = false
+    let historyLoaded:boolean = $state(false);
+    let statsOpened:boolean = $state(false);
 
-    for (let i = 0; i < dayAmount; i++) {
-        rawData.push({
-            date: Date.now() / 1000 - dayAmount * 86400 + i * 86400,
-            value: Math.round(Math.random() * 20 * i),
+    function processData(data:ChartData[], from: Date) {
+
+        let asd = data.filter((d:ChartData) => {
+            return d.date.getTime() > from.getTime()
         });
+        console.log(asd);
+        return asd;
     }
 
-    let data = processData(1737622063);
-
-    function processData(from?: Number) {
-        let finalData:ChartData[] = [];
-        rawData.forEach((d) => {
-            if (!from) {
-                finalData.push({
-                    date: new Date(d.date * 1000),
-                    value: d.value,
-                });
-            } else if (d.date > from) {
-                finalData.push({
-                    date: new Date(d.date * 1000),
-                    value: d.value,
-                });
-            }
-        });
-
-        return finalData;   
-    }
-
-    function processWorkoutHistory(wh:any) {
+    function processWorkoutHistory(wh:any):ChartData[] {
         let data:ChartData[] = [];
         wh.forEach((key:WorkoutHistory[],value:string) => {
-        console.log(key);
-
             let repsForDay:number = 0;
             key.forEach((workout:WorkoutHistory) => {
                 workout.exercises.forEach((item)=>{
@@ -92,20 +74,31 @@
         return data;
     };
 
+    let date = $state(today(getLocalTimeZone()));
+
     //@ts-ignore
     invoker("get_history").then(r=>{
         workoutHistory = new Map(Object.entries(r)); 
         historyLoaded = true;
-        data = processWorkoutHistory(workoutHistory);
+        workoutChartData = processWorkoutHistory(workoutHistory);
+        
     });
 
-    let date = today(getLocalTimeZone());
+    $effect(()=>{
+        if(historyLoaded) {
+            timeChartData = processData(workoutChartData, date.toDate(getLocalTimeZone()));
+        } 
+    })
+
+
+
 </script>
 
 <h1 class="text-5xl font-extrabold">History</h1>
-<Dialog>
+
+<Dialog open={statsOpened}>
     <DialogTrigger>
-        <Button variant="outline">View stats</Button>
+        <Button on:click={()=>statsOpened=true} variant="outline">View stats</Button>
     </DialogTrigger>
     <DialogContent class="w-[90vw]">
         <DialogHeader>
@@ -117,7 +110,7 @@
         <Calendar bind:value={date} />
         <div class="h-[40vh] p-4 border rounded">
             <Chart
-                {data}
+                data={timeChartData}
                 x="date"
                 xScale={scaleTime()}
                 y="value"
@@ -137,7 +130,7 @@
                 </Svg>
                 <Tooltip.Root let:data>
                     <Tooltip.Header
-                        >{data.date.toUTCString()}</Tooltip.Header
+                        >{data.date.toISOString().split("T")[0]}</Tooltip.Header
                     >
                     <Tooltip.List>
                         <Tooltip.Item label="Reps" value={data.value} />
@@ -147,7 +140,7 @@
         </div>
 
         <DialogFooter>
-            <Button type="submit">Close</Button>
+            <Button on:click={()=>statsOpened=false} type="submit">Close</Button>
         </DialogFooter>
     </DialogContent>
 </Dialog>
