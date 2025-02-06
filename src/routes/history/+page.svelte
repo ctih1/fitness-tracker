@@ -43,18 +43,15 @@
     let workoutHistory:Map<String,WorkoutHistory[]> = $state();
     let workoutChartData:ChartData[];
     //@ts-ignore
-    let timeChartData:ChartData[] = $state({date:new Date(), value:15});
+    let timeChartData:ChartData[] = $state({date:new Date(), value:0});
 
     let historyLoaded:boolean = $state(false);
     let statsOpened:boolean = $state(false);
 
     function processData(data:ChartData[], from: Date) {
-
-        let asd = data.filter((d:ChartData) => {
+        return data.filter((d:ChartData) => {
             return d.date.getTime() > from.getTime()
         });
-        console.log(asd);
-        return asd;
     }
 
     function processWorkoutHistory(wh:any):ChartData[] {
@@ -88,10 +85,7 @@
         if(historyLoaded) {
             timeChartData = processData(workoutChartData, date.toDate(getLocalTimeZone()));
         } 
-    })
-
-
-
+    });
 </script>
 
 <h1 class="text-5xl font-extrabold">History</h1>

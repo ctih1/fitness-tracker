@@ -3,6 +3,7 @@
     import { Label } from "$lib/components/ui/label"
     import NumberInput from "$lib/components/NumberInput.svelte";
     import { Checkbox } from "$lib/components/ui/checkbox"
+    import { Input } from "$lib/components/ui/input";
     import * as Carousel from "$lib/components/ui/carousel";
 
     import {
@@ -33,8 +34,9 @@
         name: String,
         description: String,
         steps: String[],
+        tracking_type: String,
         done?:boolean,
-        reps?:number,
+        value?:number,
         weight?:number
     }
 
@@ -144,14 +146,28 @@
                     </Carousel.Root>
                 </CardContent>
                 <CardFooter>
-                    <div class="flex-row">
-                        <h3 class="text-xl mb-[10px]">Reps:</h3>
-                        <NumberInput bind:value={exercise.reps} inputClass="w-[10ch]"/>
+                    <div class="flex-col">
+
+                        <div class="flex-row">
+                            {#if exercise.tracking_type == "reps"}
+                                <h3 class="text-xl mb-[10px]">Time</h3>
+                                <div class="flex">
+                                    <Input type="number" placeholder="0h"/>:
+                                    <Input type="number" placeholder="0m"/>:
+                                    <Input type="number" placeholder="0s"/>
+                                </div>
+                            {:else}
+                                <h3 class="text-xl mb-[10px]">{exercise.tracking_type}:</h3>
+                                <NumberInput bind:value={exercise.value} inputClass="w-[10ch]"/>
+                            {/if}
+                            
+                        </div>
+                        <div class="flex-row">
+                            <h3 class="text-xl mb-[10px]">Weight:</h3>
+                            <NumberInput bind:value={exercise.weight} inputClass="w-[10ch]"/>
+                        </div>
                     </div>
-                    <div class="flex-row">
-                        <h3 class="text-xl mb-[10px]">Weight:</h3>
-                        <NumberInput bind:value={exercise.weight} inputClass="w-[10ch]"/>
-                    </div>
+
                 </CardFooter>
             </Card>
             <br>

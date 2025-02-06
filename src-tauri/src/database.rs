@@ -6,6 +6,8 @@ use std::{fs::create_dir_all, path::Path};
 use tauri::Manager;
 use tauri_plugin_store::StoreExt;
 
+const CURRENT_SCHEMA:f32 = 0.01;
+
 #[derive(Deserialize, Serialize, Clone)]
 enum Theme {
     Light,
@@ -29,6 +31,7 @@ pub struct Exercise {
     pub description: String,
     pub steps: Vec<String>,
     pub name: String,
+    pub tracking_type: String // What is the exercise tracking (example reps, time, etc). Only used for analytics   
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -37,15 +40,14 @@ pub struct Workout {
     pub exercises: Vec<String>, // a map of workout and the exercises,
     pub name: String,
     pub description: String,
-    pub tracking_type: String // What is the exercise tracking (example reps, time, etc). Only used for analytics
 }
 
 #[derive(Deserialize, Serialize, Clone)]
-struct Data {
-    theme: Theme,
-    exercises: HashMap<String, Exercise>,
-    workouts: HashMap<String, Workout>,
-    history: HashMap<String, Vec<WorkoutHistory>>, // stored as DDMMYY:[WorkoutHistory]
+pub struct Data {
+    pub theme: Theme,
+    pub exercises: HashMap<String, Exercise>,
+    pub workouts: HashMap<String, Workout>,
+    pub history: HashMap<String, Vec<WorkoutHistory>>, // stored as DDMMYY:[WorkoutHistory],
 }
 
 pub struct db {
@@ -66,7 +68,8 @@ impl db {
 
         let app_path: std::path::PathBuf =
             app_handle.path().app_config_dir().expect("No app config!");
-        println!("{}", app_path.to_str().unwrap());
+
+        println!("Using path {}", app_path.to_str().unwrap());
         create_dir_all(&app_path).unwrap();
 
         let result = app_handle.store(Path::new(app_path.as_path()).join("store.json"));
@@ -84,6 +87,7 @@ impl db {
             };
             store.set("data", json!(example_data));
             store.set("init", true);
+            store.set("schema", CURRENT_SCHEMA);
             store.save();
         }
         let data: Data = serde_json::from_value(store.get("data").unwrap()).unwrap();

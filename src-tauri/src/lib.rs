@@ -63,6 +63,7 @@ fn create_exercise(
     name: &str,
     description: String,
     steps: Vec<String>,
+    tracking_type: String
 ) {
     let mut db = database::db::new(app_handle);
 
@@ -72,6 +73,7 @@ fn create_exercise(
         description,
         steps,
         name: e_name,
+        tracking_type
     };
     db.create_exercise(name.to_string(), exercise);
 }
@@ -81,7 +83,7 @@ fn create_workout(
     app_handle: tauri::AppHandle,
     name: &str,
     description: String,
-    exercises: Vec<String>,
+    exercises: Vec<String>
 ) {
     let mut db = database::db::new(app_handle);
 
@@ -96,11 +98,11 @@ fn create_workout(
 }
 
 #[tauri::command]
-fn save_workout(
+fn save_workout( // saves workout history
     app_handle: tauri::AppHandle,
     name: String,
     exercises: Vec<database::ExerciseResults>,
-    date: i32,
+    date: u32,
 ) {
     let mut db = database::db::new(app_handle);
 

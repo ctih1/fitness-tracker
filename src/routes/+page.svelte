@@ -36,6 +36,17 @@
         CardTitle,
     } from "$lib/components/ui/card"
 
+    import {
+        Select,
+        SelectContent,
+        SelectGroup,
+        SelectItem,
+        SelectLabel,
+        SelectTrigger,
+        SelectValue,
+    } from "$lib/components/ui/select"
+
+    import { CircleCheck, CircleAlert, Info } from 'lucide-svelte';
 
 
     //@ts-ignore
@@ -62,15 +73,21 @@
     }
 
 
-    let workouts:customWorkout[] = [];
-    let exercises:Exercise[];
+    let workouts:customWorkout[] = $state([]);
+    let exercises:Exercise[] = $state([]);
 
-    let name:String="";
-    let description:String="";
-    let steps:String="";
+    let name:String = $state("");
+    let description:String = $state("");
+    let trackingType: String = $state("");
+    let steps:String = $state("");
 
-    let workoutName:String="";
-    let workoutDescription:String="";
+    let workoutName:String = $state("");
+    let workoutDescription:String = $state("");
+
+    let alertIsVisible:boolean = $state(false);
+    let alertTitle:string = $state("");
+    let alertDescription:string = $state("");
+    let alertMode:string = $state("");
 
     async function getWorkouts(): Promise<customWorkout[]> {
         let workouts:databaseWorkout[] = await invoker("get_every_workout");
@@ -89,8 +106,8 @@
     }
 
     async function createExercise() {
-        let step_array = steps.split("\n");
-        await invoker("create_exercise", {name, description, steps:step_array})
+        let stepArray = steps.split("\n");
+        await invoker("create_exercise", {name, description, steps:stepArray, trackingType: trackingType})
         .then(()=>{
             creatingExercise = false;
         })
@@ -117,9 +134,9 @@
     }
 
 
-    let creatingExercise = false;
-    let creatingWorkout = false;
-    let newWorkout = false;
+    let creatingExercise = $state(false);
+    let creatingWorkout = $state(false);
+    let newWorkout = $state(false);
     
     //@ts-ignore
     function startWorkout(name:string, button) {
@@ -127,6 +144,17 @@
         button.disabled = true;
         button.variant="loading";
         window.location.href=`/workout?name=${name}`;
+    }
+
+    function showAlert(durationSeconds: number = 3, title: string, description:string, mode: "fail" | "success" | "") {
+        alertIsVisible = true;
+        alertTitle = title;
+        alertDescription = description;
+        alertMode = mode;
+
+        setTimeout(()=>{
+            alertIsVisible = false;
+        }, durationSeconds*1000)
     }
 
     
@@ -138,7 +166,7 @@
         getExercises().then(e=>{
             exercises = e;
         });
-    })
+    });
 </script>
 
 <div>
@@ -153,7 +181,26 @@
 
             </div>
 
+            
+            {#if alertIsVisible}
+            <div class="wrapper absolute top-[1em] left-[1em] min-w-[400px] w-[fit-content] items-center" in:blur out:blur>
+                <Alert>
+                    {#if alertMode == "fail"}
+                        <CircleAlert/>
+                    {:else if alertMode == "success"}
+                        <CircleCheck/>
+                    {:else}
+                        <Info/>
+                    {/if}
+                    <AlertTitle>{alertTitle}</AlertTitle>
+                    <AlertDescription>
+                        {alertDescription}
+                    </AlertDescription>
+                </Alert>
+            </div>
+            {/if}
         </div>
+
         <Dialog open={newWorkout}>
             <DialogContent>
                 <DialogHeader>
@@ -198,16 +245,31 @@
                 <DialogTitle>Create exercise</DialogTitle>
                 <DialogDescription>Create a new excercise. Press save to save</DialogDescription>
             </DialogHeader>
-            <div>
-                <div class="basic-info">
+            <div class="info">
+                <div>
                     <Label>Name</Label>
                     <Input placeholder="Squat" bind:value={name}/>
                 </div>
-                <div class="class-info">
+                <div>
                     <Label>Description</Label>
                     <Input placeholder="A squat is a lower-body exercise where you bend your knees and hips to lower your body, then return to a standing position, targeting the legs and glutes." bind:value={description}/>
+                    <p>These steps will be shown once you are working out</p>
+
                 </div>
-                <div class="class-info">
+                <div>
+                    <Label>Tracking type</Label>
+                    <Select onSelectedChange={(event)=>trackingType=event?.value}>
+                        <SelectTrigger>
+                            <SelectValue>Select tracking type</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="reps">Reps</SelectItem>
+                            <SelectItem value="time">Time</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <p>Changes what data is saved during a workout.</p>
+                </div>
+                <div>
                     <Label>Steps</Label>
                     <Textarea placeholder="Stand with feet shoulder-width apart.
 Bend your knees and lower your body like you're sitting.
@@ -218,7 +280,12 @@ Push through your heels to stand back up."
                 </div>
             </div>
             <DialogFooter>
-                <Button on:click={()=>{creatingExercise=false;createExercise(); getExercises().then(r=>exercises=r);}} type="submit">Save</Button>
+                <Button on:click={()=>{
+                    creatingExercise=false;
+                    createExercise(); 
+                    getExercises().then(r=>exercises=r);
+                    showAlert(undefined,"Exercise saved", `Exercise ${name} saved successfully`, "success");
+                    }} type="submit">Save</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
@@ -278,8 +345,22 @@ Push through your heels to stand back up."
     </Dialog>
 </div>
 
-<style>
+<style lang="scss">
     .selected p:not(:last-child)::after{
         content: ",";
+    }
+
+    .info {
+        div {
+            margin-bottom: 1em;
+            margin-top: 1em;
+        }
+
+        p {
+            font-size: 14px;
+            font-weight: 300;
+            opacity: 0.5;
+            font-style: italic;
+        }
     }
 </style>
