@@ -170,12 +170,10 @@
                                         {/each}
                                     </ul>
                                 </div>
-                                
                             </CardContent>
                             {#if index != dates.length+1}
                             <hr>
                             {/if}
-
                         {/each}
                     </Card>
                 </Carousel.Item>

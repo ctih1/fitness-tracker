@@ -12,6 +12,11 @@
         slide
     } from 'svelte/transition'
     
+    import {
+        Alert,
+        AlertDescription,
+        AlertTitle,
+    } from "$lib/components/ui/alert"
 
     import {
         Dialog,
@@ -87,7 +92,7 @@
         let step_array = steps.split("\n");
         await invoker("create_exercise", {name, description, steps:step_array})
         .then(()=>{
-            window.location.reload();
+            creatingExercise = false;
         })
     }
 
@@ -213,64 +218,64 @@ Push through your heels to stand back up."
                 </div>
             </div>
             <DialogFooter>
-                <Button on:click={()=>{creatingExercise=false;createExercise()}} type="submit">Save</Button>
+                <Button on:click={()=>{creatingExercise=false;createExercise(); getExercises().then(r=>exercises=r);}} type="submit">Save</Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
 
-        <Dialog open={creatingWorkout}>
-            <DialogContent class="h-[80vh] overflow-y-scroll">
-                <DialogHeader>
-                    <DialogTitle>Create workout</DialogTitle>
-                    <DialogDescription>Create new workout with exercises you've created</DialogDescription>
-                    
-                    <div class="selected flex">
-                        {#each exercises as exercise}
-                            {#if exercise.selected}
-                                <p>{exercise.name}</p>
-                                <Button class="" on:click={()=>exercise.selected=false}>X</Button>
-                            {/if}
-                        {/each}
-                    </div>
-                    
-                </DialogHeader>
-                <div>
-                    <Label>Workout name</Label>
-                    <Input bind:value={workoutName} />
-                    <Label>Workout description</Label>
-                    <Input bind:value={workoutDescription} />
-                </div>
-                <div>
-                    <h1>Select exercises to include</h1>
+    <Dialog open={creatingWorkout}>
+        <DialogContent class="h-[80vh] overflow-y-scroll">
+            <DialogHeader>
+                <DialogTitle>Create workout</DialogTitle>
+                <DialogDescription>Create new workout with exercises you've created</DialogDescription>
+                
+                <div class="selected flex">
                     {#each exercises as exercise}
-                        {#if !exercise.selected}
-                        <div in:blur out:slide={{ duration: 500 }} class="wrap">
-                            <Card>
-                                <CardHeader>
-                                    <h1 class="font-extrabold text-3xl">{exercise.name}</h1>
-                                    <p>{exercise.description}
-                                </CardHeader>
-                                <CardContent>
-                                    <Label class="font-semibold text-xl">Steps: </Label>
-                                    <ol>
-                                    {#each exercise.steps as step, index}
-                                        <li>{index+1}. {step}</li>
-                                    {/each}
-                                    </ol>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button on:click={()=>{exercise.selected=true}} variant="secondary">Add</Button>
-                                </CardFooter>   
-                            </Card>
-                        </div>
+                        {#if exercise.selected}
+                            <p>{exercise.name}</p>
+                            <Button class="" on:click={()=>exercise.selected=false}>X</Button>
                         {/if}
                     {/each}
                 </div>
-                <DialogFooter>
-                    <Button on:click={()=>{creatingWorkout=false; createWorkout()}} type="submit">Save</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                
+            </DialogHeader>
+            <div>
+                <Label>Workout name</Label>
+                <Input bind:value={workoutName} />
+                <Label>Workout description</Label>
+                <Input bind:value={workoutDescription} />
+            </div>
+            <div>
+                <h1>Select exercises to include</h1>
+                {#each exercises as exercise}
+                    {#if !exercise.selected}
+                    <div in:blur out:slide={{ duration: 500 }} class="wrap">
+                        <Card>
+                            <CardHeader>
+                                <h1 class="font-extrabold text-3xl">{exercise.name}</h1>
+                                <p>{exercise.description}
+                            </CardHeader>
+                            <CardContent>
+                                <Label class="font-semibold text-xl">Steps: </Label>
+                                <ol>
+                                {#each exercise.steps as step, index}
+                                    <li>{index+1}. {step}</li>
+                                {/each}
+                                </ol>
+                            </CardContent>
+                            <CardFooter>
+                                <Button on:click={()=>{exercise.selected=true}} variant="secondary">Add</Button>
+                            </CardFooter>   
+                        </Card>
+                    </div>
+                    {/if}
+                {/each}
+            </div>
+            <DialogFooter>
+                <Button on:click={()=>{creatingWorkout=false; createWorkout()}} type="submit">Save</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </div>
 
 <style>
