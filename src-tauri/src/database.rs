@@ -11,17 +11,18 @@ enum Theme {
     Light,
     Dark,
 }
+
 #[derive(Deserialize, Serialize, Clone)]
 pub struct WorkoutHistory {
     pub name: String,
     pub exercises: Vec<ExerciseResults>,
-    pub date: i32, // epoch timestamp
+    pub date: u32, // epoch timestamp
 }
 #[derive(Deserialize, Serialize, Clone)]
 pub struct ExerciseResults {
     pub name: String,
-    pub reps: i32,
-    pub weight: i32,
+    pub value: u32,
+    pub weight: u32,
 }
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Exercise {
@@ -36,6 +37,7 @@ pub struct Workout {
     pub exercises: Vec<String>, // a map of workout and the exercises,
     pub name: String,
     pub description: String,
+    pub tracking_type: String // What is the exercise tracking (example reps, time, etc). Only used for analytics
 }
 
 #[derive(Deserialize, Serialize, Clone)]
